@@ -55,11 +55,11 @@ contract VoteEscrow {
         bool oc = deliverOutcome();
         if (oc == true) {
             //split by true vote
-            return countHate + countLove / countLove;
+            return wager * (countHate + countLove) / countLove;
         }
         else {
             //split by false vote
-            return countHate + countLove / countHate; 
+            return wager * (countHate + countLove) / countHate; 
         }
     }
     function deliverOutcome() internal view returns (bool){
