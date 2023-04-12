@@ -3,6 +3,7 @@ contract VoteEscrow {
     
     uint immutable wager; 
     mapping (address => bool) public addyToVote;
+    mapping (address => bool) public voted;
     uint countLove;
     uint countHate;
     bool locked;
@@ -25,6 +26,7 @@ contract VoteEscrow {
         require(!locked);
         require(msg.value >= wager);
         addyToVote[msg.sender] = vote;
+        voted[msg.sender] = true;
         if (vote == true){
             ++countLove;
         }
@@ -46,6 +48,7 @@ contract VoteEscrow {
     function collectPayout() external {
         bool outcome = deliverOutcome();
         require(addyToVote[msg.sender] == outcome);
+        require(voted[msg.sender]);
         uint payout = calculatePayout();
         (bool sent,) = (msg.sender).call{value: payout}("");
         require (sent);
