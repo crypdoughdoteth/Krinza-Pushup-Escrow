@@ -42,26 +42,14 @@ contract VoteEscrow {
     }
 
     // Vote after the time lock
-    // function voteOutcome(bytes32[] calldata proof, uint index, bool decision) external {
-    //     require(verifyProof(proof, index, msg.sender), "failed to verify proof");
-    //     require(!outcomeVoted[msg.sender]);
-    //     outcomeVoted[msg.sender] = true;
-    //     if (decision == true){
-    //         ++trueAttestation;
-    //     }
-    //     else {
-    //         ++falseAttestation;
-    //     }
-    // }
-    function voteOutcome(
-        bytes32[] calldata proof,
-        uint index,
-        bool decision
-    ) external {
-        require(verifyProof(state, proof, msg.sender, index), "failed to verify proof");
-        if (decision == true) {
+    function voteOutcome(bytes32[] calldata proof, uint index, bool decision) external {
+        require(verifyProof(proof, index, msg.sender), "failed to verify proof");
+        require(!outcomeVoted[msg.sender]);
+        outcomeVoted[msg.sender] = true;
+        if (decision == true){
             ++trueAttestation;
-        } else {
+        }
+        else {
             ++falseAttestation;
         }
     }
@@ -124,18 +112,4 @@ contract VoteEscrow {
         return hash == root;
     }
 
-    // function verifyProof(bytes32[] calldata proof, uint index, address leafAddy) public view returns (bool) {
-    //     bytes32 addyHash = keccak256(abi.encodePacked(leafAddy));
-    //     for (uint i = 0; i < proof.length - 1; ++i){
-    //         bytes32 proofElement = proof[i];
-    //         if (index % 2 == 0) {
-    //             addyHash = keccak256(abi.encodePacked(addyHash, proofElement));
-    //         } else {
-    //             addyHash = keccak256(abi.encodePacked(proofElement, addyHash));
-    //         }
-
-    //         index = index / 2;
-    //     }
-    //     return addyHash == state;
-    // }
 }
