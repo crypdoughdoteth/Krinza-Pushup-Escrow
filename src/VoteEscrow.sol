@@ -14,10 +14,10 @@ contract VoteEscrow is ERC1155 {
     uint32 public countHate;
     uint locked;
     uint gameOver;
-    uint32 validatorCount;
+    uint32 immutable validatorCount;
     uint32 trueAttestation;
     uint32 falseAttestation;
-    bytes32 state;
+    bytes32 immutable state;
     uint256 prizeShareSize;
     //temp to delet
     uint public totalValue;
