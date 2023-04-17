@@ -1,7 +1,9 @@
+// SPDX-License-Identifier: MIT
 pragma solidity 0.8.19;
 // import "openzeppelin/contracts/token/ERC1155/ERC1155.sol";
 
 import "../lib/openzeppelin-contracts/contracts/token/ERC1155/ERC1155.sol";
+import "../lib/openzeppelin-contracts/contracts/utils/Strings.sol";
 
 contract VoteEscrow is ERC1155 {
     uint immutable wager;
@@ -25,6 +27,7 @@ contract VoteEscrow is ERC1155 {
     uint256 prizeShareSize;
     //temp to delet
     uint public totalValue;
+    string public NFT;
 
     constructor(uint betAmount, uint32 validators, bytes32 root) ERC1155("") {
         wager = betAmount;
@@ -152,4 +155,27 @@ contract VoteEscrow is ERC1155 {
 
         return hash == root;
     }
+
+    // NFT 
+    function name() public pure returns (string memory) {
+        return "Krinza Push Up";
+    }
+
+    function symbol() public pure returns (string memory) {
+        return "PUSH";
+    }
+
+    // URI overide for number schemes
+    function uri(uint256 _tokenId)
+        public
+        view
+        override
+        returns (string memory)
+    {
+        return
+            string(
+                abi.encodePacked(NFT, Strings.toString(_tokenId), ".json")
+            );
+    }
+
 }
