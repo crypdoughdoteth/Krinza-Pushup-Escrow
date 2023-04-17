@@ -13,6 +13,7 @@ contract VoteEscrow is ERC1155 {
     mapping(address => bool) public outcomeVoted;
     mapping(address => bool) public votedToLock;
     mapping(address => bool) public votedToEndGame;
+    mapping(address => bool) public paid;
     uint32 public countLove;
     uint32 public countHate;
     uint locked;
@@ -93,9 +94,11 @@ contract VoteEscrow is ERC1155 {
 
     function collectPayout() external {
         require(gameOver > (validatorCount * 10 ** 18) / 2);
+        require(!paid[msg.sender]);
         bool outcome = deliverOutcome();
         require(addyToVote[msg.sender] == outcome);
         require(voted[msg.sender]);
+        paid[msg.sender] = true;
         uint payout = calculatePayout(outcome);
         (bool sent, ) = (msg.sender).call{value: payout}("");
         require(sent);
