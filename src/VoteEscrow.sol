@@ -1,5 +1,8 @@
 pragma solidity 0.8.19;
-import "../node_modules/@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
+// import "openzeppelin/contracts/token/ERC1155/ERC1155.sol";
+
+import "../lib/openzeppelin-contracts/contracts/token/ERC1155/ERC1155.sol";
+
 contract VoteEscrow is ERC1155 {
     uint immutable wager;
     //tracks who voted for what
@@ -22,35 +25,42 @@ contract VoteEscrow is ERC1155 {
     //temp to delet
     uint public totalValue;
 
-    constructor(uint betAmount, uint32 validators, bytes32 root) ERC1155(""){
+    constructor(uint betAmount, uint32 validators, bytes32 root) ERC1155("") {
         wager = betAmount;
         validatorCount = validators;
         state = root;
     }
 
     function lockBets(bytes32[] calldata proof, uint index) external {
-        require(verifyProof(state, proof, msg.sender, index), "failed to verify proof");
+        require(
+            verifyProof(state, proof, msg.sender, index),
+            "failed to verify proof"
+        );
         require(!votedToLock[msg.sender]);
-        votedToLock[msg.sender] = true; 
+        votedToLock[msg.sender] = true;
         locked += 1e18;
     }
+
     function endGame(bytes32[] calldata proof, uint index) external {
-        require(verifyProof(state, proof, msg.sender, index), "failed to verify proof");
+        require(
+            verifyProof(state, proof, msg.sender, index),
+            "failed to verify proof"
+        );
         require(!votedToEndGame[msg.sender]);
-        votedToEndGame[msg.sender] = true; 
+        votedToEndGame[msg.sender] = true;
         gameOver += 1e18;
     }
 
     //in native asset of chain
     function depositVote(bool vote) external payable {
-        require(locked <= validatorCount * 10 ** 18 / 2);
+        require(locked <= (validatorCount * 10 ** 18) / 2);
         require(msg.value >= wager);
         require(!voted[msg.sender]);
         addyToVote[msg.sender] = vote;
         voted[msg.sender] = true;
         //don't forget to delete line below
         totalValue += msg.value;
-        if (vote == true) {
+        if (vote) {
             ++countLove;
             _mint(msg.sender, 0, 1, "");
         } else {
@@ -60,23 +70,29 @@ contract VoteEscrow is ERC1155 {
     }
 
     // Vote after bets lock
-    function voteOutcome(bytes32[] calldata proof, uint index, bool decision) external {
-        require(verifyProof(state, proof, msg.sender, index), "failed to verify proof");
+    function voteOutcome(
+        bytes32[] calldata proof,
+        uint index,
+        bool decision
+    ) external {
+        require(
+            verifyProof(state, proof, msg.sender, index),
+            "failed to verify proof"
+        );
         //bets must be locked
-        require(locked<= validatorCount * 10 ** 18 / 2);
+        require(locked <= (validatorCount * 10 ** 18) / 2);
         //no double voting
         require(!outcomeVoted[msg.sender]);
         outcomeVoted[msg.sender] = true;
-        if (decision == true){
+        if (decision) {
             ++trueAttestation;
-        }
-        else {
+        } else {
             ++falseAttestation;
         }
     }
 
     function collectPayout() external {
-        require(gameOver > validatorCount * 10 ** 18 / 2);
+        require(gameOver > (validatorCount * 10 ** 18) / 2);
         bool outcome = deliverOutcome();
         require(addyToVote[msg.sender] == outcome);
         require(voted[msg.sender]);
@@ -87,13 +103,17 @@ contract VoteEscrow is ERC1155 {
 
     function calculatePayout(bool oc) internal returns (uint) {
         // condition is only true the first time it runs, so state is set only then, the rest simply returns prizeShareSize
-        if (prizeShareSize == 0){
+        if (prizeShareSize == 0) {
             if (oc == true) {
                 //split by true vote
-                prizeShareSize = ((wager * (countHate + countLove)) * 10 ** 18)/ countLove;
+                prizeShareSize =
+                    ((wager * (countHate + countLove)) * 10 ** 18) /
+                    countLove;
             } else {
                 //split by false vote
-                prizeShareSize = ((wager * (countHate + countLove)) * 10 ** 18) / countHate;
+                prizeShareSize =
+                    ((wager * (countHate + countLove)) * 10 ** 18) /
+                    countHate;
             }
         }
         return prizeShareSize;
@@ -129,5 +149,4 @@ contract VoteEscrow is ERC1155 {
 
         return hash == root;
     }
-
 }
