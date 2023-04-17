@@ -1,6 +1,7 @@
 pragma solidity 0.8.19;
 // import "openzeppelin/contracts/token/ERC1155/ERC1155.sol";
-import "/Users/happy/Documents/Blockchain/D_D/Krinza-Pushup-Escrow/lib/openzeppelin-contracts/contracts/token/ERC1155/ERC1155.sol";
+
+import "../lib/openzeppelin-contracts/contracts/token/ERC1155/ERC1155.sol";
 
 contract VoteEscrow is ERC1155 {
     uint immutable wager;
@@ -93,7 +94,7 @@ contract VoteEscrow is ERC1155 {
     function collectPayout() external {
         require(gameOver > (validatorCount * 10 ** 18) / 2);
         bool outcome = deliverOutcome();
-        require(addyToVote[msg.sender]);
+        require(addyToVote[msg.sender] == outcome);
         require(voted[msg.sender]);
         uint payout = calculatePayout(outcome);
         (bool sent, ) = (msg.sender).call{value: payout}("");
