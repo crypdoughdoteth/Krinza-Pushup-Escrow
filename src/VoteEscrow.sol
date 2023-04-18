@@ -1,7 +1,9 @@
+// SPDX-License-Identifier: MIT
 pragma solidity 0.8.19;
 // import "openzeppelin/contracts/token/ERC1155/ERC1155.sol";
 
 import "../lib/openzeppelin-contracts/contracts/token/ERC1155/ERC1155.sol";
+import "../lib/openzeppelin-contracts/contracts/utils/Strings.sol";
 
 contract VoteEscrow is ERC1155 {
     uint immutable wager;
@@ -22,14 +24,17 @@ contract VoteEscrow is ERC1155 {
     uint32 trueAttestation;
     uint32 falseAttestation;
     bytes32 immutable state;
-    uint256 prizeShareSize;
+    uint256 prizeShareSize;    
+    string public tokenURI;
+
     //temp to delet
     uint public totalValue;
 
-    constructor(uint betAmount, uint32 validators, bytes32 root) ERC1155("") {
+    constructor(uint betAmount, uint32 validators, bytes32 root, string memory URI) ERC1155("") {
         wager = betAmount;
         validatorCount = validators;
         state = root;
+        tokenURI = URI; 
     }
 
     function lockBets(bytes32[] calldata proof, uint index) external {
@@ -152,4 +157,26 @@ contract VoteEscrow is ERC1155 {
 
         return hash == root;
     }
+
+    // impl 1155
+    function name() public pure returns (string memory) {
+        return "Krinza Push Up";
+    }
+
+    function symbol() public pure returns (string memory) {
+        return "PUSH";
+    }
+
+    function uri(uint256 _tokenId)
+        public
+        view
+        override
+        returns (string memory)
+    {
+        return
+            string(
+                abi.encodePacked(tokenURI, Strings.toString(_tokenId))
+            );
+    }
+
 }
