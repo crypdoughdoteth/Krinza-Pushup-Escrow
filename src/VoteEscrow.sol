@@ -24,15 +24,17 @@ contract VoteEscrow is ERC1155 {
     uint32 trueAttestation;
     uint32 falseAttestation;
     bytes32 immutable state;
-    uint256 prizeShareSize;
+    uint256 prizeShareSize;    
+    string public tokenURI;
+
     //temp to delet
     uint public totalValue;
-    string public NFT;
 
-    constructor(uint betAmount, uint32 validators, bytes32 root) ERC1155("") {
+    constructor(uint betAmount, uint32 validators, bytes32 root, string memory URI) ERC1155("") {
         wager = betAmount;
         validatorCount = validators;
         state = root;
+        tokenURI = URI; 
     }
 
     function lockBets(bytes32[] calldata proof, uint index) external {
@@ -156,7 +158,7 @@ contract VoteEscrow is ERC1155 {
         return hash == root;
     }
 
-    // NFT 
+    // impl 1155
     function name() public pure returns (string memory) {
         return "Krinza Push Up";
     }
@@ -165,7 +167,6 @@ contract VoteEscrow is ERC1155 {
         return "PUSH";
     }
 
-    // URI overide for number schemes
     function uri(uint256 _tokenId)
         public
         view
@@ -174,7 +175,7 @@ contract VoteEscrow is ERC1155 {
     {
         return
             string(
-                abi.encodePacked(NFT, Strings.toString(_tokenId), ".json")
+                abi.encodePacked(tokenURI, Strings.toString(_tokenId))
             );
     }
 
