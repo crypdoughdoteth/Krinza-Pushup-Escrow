@@ -24,17 +24,22 @@ contract VoteEscrow is ERC1155 {
     uint32 trueAttestation;
     uint32 falseAttestation;
     bytes32 immutable state;
-    uint256 prizeShareSize;    
+    uint256 prizeShareSize;
     string public tokenURI;
 
     //temp to delet
     uint public totalValue;
 
-    constructor(uint betAmount, uint32 validators, bytes32 root, string memory URI) ERC1155("") {
+    constructor(
+        uint betAmount,
+        uint32 validators,
+        bytes32 root,
+        string memory URI
+    ) ERC1155("") {
         wager = betAmount;
         validatorCount = validators;
         state = root;
-        tokenURI = URI; 
+        tokenURI = URI;
     }
 
     function lockBets(bytes32[] calldata proof, uint index) external {
@@ -112,7 +117,7 @@ contract VoteEscrow is ERC1155 {
     function calculatePayout(bool oc) internal returns (uint) {
         // condition is only true the first time it runs, so state is set only then, the rest simply returns prizeShareSize
         if (prizeShareSize == 0) {
-            if (oc == true) {
+            if (oc) {
                 //split by true vote
                 prizeShareSize =
                     ((wager * (countHate + countLove)) * 10 ** 18) /
@@ -167,16 +172,9 @@ contract VoteEscrow is ERC1155 {
         return "PUSH";
     }
 
-    function uri(uint256 _tokenId)
-        public
-        view
-        override
-        returns (string memory)
-    {
-        return
-            string(
-                abi.encodePacked(tokenURI, Strings.toString(_tokenId))
-            );
+    function uri(
+        uint256 _tokenId
+    ) public view override returns (string memory) {
+        return string(abi.encodePacked(tokenURI, Strings.toString(_tokenId)));
     }
-
 }
