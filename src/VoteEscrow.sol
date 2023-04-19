@@ -8,7 +8,6 @@ contract VoteEscrow is ERC1155 {
     uint immutable wager;
     //tracks who voted for what
     mapping(address => bool) public addyToVote;
-    bool outcomeDecided;
     //prevents double voting in the contest
     mapping(address => bool) public voted;
     //tracks which judges already voted for the success or failure of krinza's pushups
