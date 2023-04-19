@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.19;
-// import "openzeppelin/contracts/token/ERC1155/ERC1155.sol";
 
 import "../lib/openzeppelin-contracts/contracts/token/ERC1155/ERC1155.sol";
 import "../lib/openzeppelin-contracts/contracts/utils/Strings.sol";
@@ -9,6 +8,7 @@ contract VoteEscrow is ERC1155 {
     uint immutable wager;
     //tracks who voted for what
     mapping(address => bool) public addyToVote;
+    bool outcomeDecided;
     //prevents double voting in the contest
     mapping(address => bool) public voted;
     //tracks which judges already voted for the success or failure of krinza's pushups
@@ -48,6 +48,10 @@ contract VoteEscrow is ERC1155 {
     }
 
     function endGame(bytes32[] calldata proof, uint index) external {
+        //at least half of the validators must have voted
+        require((trueAttestation + falseAttestation) * 10 ** 18 >= (validatorCount * 10 ** 18) / 2);
+        //bets must have been locked first 
+        require(locked >= (validatorCount * 10 ** 18) / 2);
         require(
             verifyProof(state, proof, msg.sender, index),
             "failed to verify proof"
@@ -59,8 +63,8 @@ contract VoteEscrow is ERC1155 {
 
     //in native asset of chain
     function depositVote(bool vote) external payable {
-        require(locked <= (validatorCount * 10 ** 18) / 2);
-        require(msg.value >= wager);
+        require(locked < (validatorCount * 10 ** 18) / 2);
+        require(msg.value == wager);
         require(!voted[msg.sender]);
         addyToVote[msg.sender] = vote;
         voted[msg.sender] = true;
@@ -86,7 +90,7 @@ contract VoteEscrow is ERC1155 {
             "failed to verify proof"
         );
         //bets must be locked
-        require(locked <= (validatorCount * 10 ** 18) / 2);
+        require(locked >= (validatorCount * 10 ** 18) / 2);
         //no double voting
         require(!outcomeVoted[msg.sender]);
         outcomeVoted[msg.sender] = true;
