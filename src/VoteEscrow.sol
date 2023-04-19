@@ -115,12 +115,12 @@ contract VoteEscrow is ERC1155 {
             if (oc == true) {
                 //split by true vote
                 prizeShareSize =
-                    ((wager * (countHate + countLove)) * 10 ** 18) /
+                    address(this).balance /
                     countLove;
             } else {
                 //split by false vote
                 prizeShareSize =
-                    ((wager * (countHate + countLove)) * 10 ** 18) /
+                    address(this).balance /
                     countHate;
             }
         }
