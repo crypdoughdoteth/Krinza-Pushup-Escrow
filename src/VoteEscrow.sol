@@ -4,8 +4,6 @@ pragma solidity 0.8.19;
 /// @title An escrow contract where the community verifies the outcome of an event that triggers a payout.
 /// @custom:experimental This is an experimental contract.
 
-/// @dev This is commented out because not working with slither
-
 import "../lib/openzeppelin-contracts/contracts/token/ERC1155/ERC1155.sol";
 import "../lib/openzeppelin-contracts/contracts/utils/Strings.sol";
 
