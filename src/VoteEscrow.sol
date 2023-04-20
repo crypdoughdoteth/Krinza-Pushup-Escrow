@@ -1,15 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.19;
 
-/// @title A escrow contract for a votes
+/// @title An escrow contract where the community verifies the outcome of an event that triggers a payout.
 /// @custom:experimental This is an experimental contract.
 
 /// @dev This is commented out because not working with slither
-// import "openzeppelin/contracts/token/ERC1155/ERC1155.sol";
 
 import "../lib/openzeppelin-contracts/contracts/token/ERC1155/ERC1155.sol";
 import "../lib/openzeppelin-contracts/contracts/utils/Strings.sol";
-// import "../lib/openzeppelin-contracts/contracts/access/Ownable.sol";
 
 contract VoteEscrow is ERC1155 {
     uint immutable wager;
