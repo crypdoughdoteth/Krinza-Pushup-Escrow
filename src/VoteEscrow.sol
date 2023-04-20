@@ -1,8 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.19;
 
+/// @title A escrow contract for a votes
+/// @custom:experimental This is an experimental contract.
+
+/// @dev This is commented out because not working with slither
+// import "openzeppelin/contracts/token/ERC1155/ERC1155.sol";
+
 import "../lib/openzeppelin-contracts/contracts/token/ERC1155/ERC1155.sol";
 import "../lib/openzeppelin-contracts/contracts/utils/Strings.sol";
+// import "../lib/openzeppelin-contracts/contracts/access/Ownable.sol";
 
 contract VoteEscrow is ERC1155 {
     uint immutable wager;
@@ -36,6 +43,7 @@ contract VoteEscrow is ERC1155 {
         tokenURI = URI; 
     }
 
+    /// @dev Only wallets set on offchain merkle tree can call this function to stops bets
     function lockBets(bytes32[] calldata proof, uint index) external {
         require(
             verifyProof(state, proof, msg.sender, index),
@@ -46,6 +54,7 @@ contract VoteEscrow is ERC1155 {
         locked += 1e18;
     }
 
+    /// @dev Only wallets set on offchain merkle tree can call this function to end the game
     function endGame(bytes32[] calldata proof, uint index) external {
         //at least half of the validators must have voted
         require((trueAttestation + falseAttestation) * 10 ** 18 >= (validatorCount * 10 ** 18) / 2);
@@ -60,11 +69,11 @@ contract VoteEscrow is ERC1155 {
         gameOver += 1e18;
     }
 
-    //in native asset of chain
+    /// @dev In native asset to cast vote and recieve NFT
     function depositVote(bool vote) external payable {
-        require(locked < (validatorCount * 10 ** 18) / 2);
-        require(msg.value == wager);
-        require(!voted[msg.sender]);
+        require((locked < (validatorCount * 10 ** 18) / 2), "bets locked");
+        require((msg.value == wager), "wrong amount");
+        require(!voted[msg.sender], "already voted");
         addyToVote[msg.sender] = vote;
         voted[msg.sender] = true;
         //don't forget to delete line below
@@ -78,7 +87,7 @@ contract VoteEscrow is ERC1155 {
         }
     }
 
-    // Vote after bets lock
+    /// @dev Vote after bets lock
     function voteOutcome(
         bytes32[] calldata proof,
         uint index,
@@ -89,7 +98,7 @@ contract VoteEscrow is ERC1155 {
             "failed to verify proof"
         );
         //bets must be locked
-        require(locked >= (validatorCount * 10 ** 18) / 2);
+        require((locked >= (validatorCount * 10 ** 18) / 2), "bets not locked");
         //no double voting
         require(!outcomeVoted[msg.sender]);
         outcomeVoted[msg.sender] = true;
@@ -101,15 +110,15 @@ contract VoteEscrow is ERC1155 {
     }
 
     function collectPayout() external {
-        require(gameOver > (validatorCount * 10 ** 18) / 2);
-        require(!paid[msg.sender]);
+        require((gameOver >= (validatorCount * 10 ** 18) / 2) , "game not over");
+        require(!paid[msg.sender], "already paid");
         bool outcome = deliverOutcome();
-        require(addyToVote[msg.sender] == outcome);
-        require(voted[msg.sender]);
+        require(addyToVote[msg.sender] == outcome, "you voted wrong");
+        require(voted[msg.sender], "you didn't vote");
         paid[msg.sender] = true;
         uint payout = calculatePayout(outcome);
         (bool sent, ) = (msg.sender).call{value: payout}("");
-        require(sent);
+        require(sent, "Failed to send Ether");
     }
 
     function calculatePayout(bool oc) internal returns (uint) {
@@ -161,7 +170,7 @@ contract VoteEscrow is ERC1155 {
         return hash == root;
     }
 
-    // impl 1155
+    /// @dev implementing 1155 functions for the NFT
     function name() public pure returns (string memory) {
         return "Krinza Push Up";
     }
