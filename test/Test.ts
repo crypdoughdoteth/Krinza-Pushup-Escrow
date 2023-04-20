@@ -49,6 +49,7 @@ describe("Lock", function () {
       const { escrow, otherAccount, owner, thirdAccount } = await loadFixture(
         beforeEachFunction
       );
+      console.log("owner: ", owner.address);
 
       await escrow
         .connect(otherAccount)

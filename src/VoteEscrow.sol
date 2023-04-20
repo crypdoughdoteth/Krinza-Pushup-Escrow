@@ -190,5 +190,4 @@ contract VoteEscrow is ERC1155 {
                 abi.encodePacked(tokenURI, Strings.toString(_tokenId))
             );
     }
-
 }
