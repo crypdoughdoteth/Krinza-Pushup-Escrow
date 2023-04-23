@@ -8,15 +8,13 @@ import "../lib/openzeppelin-contracts/contracts/token/ERC1155/ERC1155.sol";
 import "../lib/openzeppelin-contracts/contracts/utils/Strings.sol";
 
 contract VoteEscrow is ERC1155 {
+    event deposit(uint256 amount, bool believer);
+    event winnerPayout(uint256 amount);
+    event votedOutcome(bool);
+    event lock(uint256 num);
+    event gameEnded(uint256 num);
 
-    
-    event deposit(uint amount, bool believer);
-    event winnerPayout(uint amount);
-    event votedOutcome(bool); 
-    event lock(uint num);
-    event gameEnded(uint num);
-    
-    uint immutable wager;
+    uint256 immutable wager;
     //tracks who voted for what
     mapping(address => bool) public addyToVote;
     //prevents double voting in the contest
@@ -122,10 +120,10 @@ contract VoteEscrow is ERC1155 {
         if (prizeShareSize == 0) {
             if (oc == true) {
                 //split by true vote
-                prizeShareSize = address(this).balance / countLove;
+                prizeShareSize = address(this).balance / uint256(countLove);
             } else {
                 //split by false vote
-                prizeShareSize = address(this).balance / countHate;
+                prizeShareSize = address(this).balance / uint256(countHate);
             }
         }
         return prizeShareSize;
