@@ -8,6 +8,13 @@ import "../lib/openzeppelin-contracts/contracts/token/ERC1155/ERC1155.sol";
 import "../lib/openzeppelin-contracts/contracts/utils/Strings.sol";
 
 contract VoteEscrow is ERC1155 {
+    
+    event deposit(uint amount, bool believer);
+    event winnerPayout(uint amount);
+    event votedOutcome(bool); 
+    event lock(uint num);
+    event gameEnded(uint num);
+    
     uint immutable wager;
     //tracks who voted for what
     mapping(address => bool) public addyToVote;
@@ -48,6 +55,7 @@ contract VoteEscrow is ERC1155 {
         require(!votedToLock[msg.sender]);
         votedToLock[msg.sender] = true;
         locked += 1e18;
+        emit lock(locked);
     }
 
     /// @dev Only wallets set on offchain merkle tree can call this function to end the game
@@ -63,6 +71,7 @@ contract VoteEscrow is ERC1155 {
         require(!votedToEndGame[msg.sender]);
         votedToEndGame[msg.sender] = true;
         gameOver += 1e18;
+        emit gameEnded(gameOver);
     }
 
     /// @dev In native asset to cast vote and recieve NFT
@@ -81,6 +90,7 @@ contract VoteEscrow is ERC1155 {
             ++countHate;
             _mint(msg.sender, 1, 1, "");
         }
+        emit deposit(msg.value, vote);
     }
 
     /// @dev Vote after bets lock
@@ -103,6 +113,7 @@ contract VoteEscrow is ERC1155 {
         } else {
             ++falseAttestation;
         }
+        emit votedOutcome(decision);
     }
 
     function collectPayout() external {
@@ -115,6 +126,7 @@ contract VoteEscrow is ERC1155 {
         uint payout = calculatePayout(outcome);
         (bool sent, ) = (msg.sender).call{value: payout}("");
         require(sent, "Failed to send Ether");
+        emit winnerPayout(prizeShareSize);
     }
 
     function calculatePayout(bool oc) internal returns (uint) {
