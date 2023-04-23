@@ -17,7 +17,7 @@ console.log(proof)
 //0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
 
 //Foundry Wallet
-// //0x1804c8AB1F12E6bbf3894d4083f33e07309d1f38
+//  wallet address = 0x1804c8AB1F12E6bbf3894d4083f33e07309d1f38
 //  root = 0x8105e4bfc32133bb21f02a967af16a94f24158434c51f2aba115b6856d85ea7c
 //  index= 0
 //  proof = [

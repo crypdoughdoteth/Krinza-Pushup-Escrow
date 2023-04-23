@@ -12,7 +12,7 @@ import "../lib/openzeppelin-contracts/contracts/utils/Strings.sol";
 // import "../lib/openzeppelin-contracts/contracts/access/Ownable.sol";
 
 contract VoteEscrow is ERC1155 {
-    uint immutable wager;
+    uint256 immutable wager;
     //tracks who voted for what
     mapping(address => bool) public addyToVote;
     //prevents double voting in the contest
@@ -24,46 +24,40 @@ contract VoteEscrow is ERC1155 {
     mapping(address => bool) public paid;
     uint32 public countLove;
     uint32 public countHate;
-    uint locked;
-    uint gameOver;
+    uint256 locked;
+    uint256 gameOver;
     uint32 immutable validatorCount;
     uint32 trueAttestation;
     uint32 falseAttestation;
     bytes32 immutable state;
-    uint256 prizeShareSize;    
+    uint256 prizeShareSize;
     string public tokenURI;
 
     //temp to delet
-    uint public totalValue;
+    uint256 public totalValue;
 
-    constructor(uint betAmount, uint32 validators, bytes32 root, string memory URI) ERC1155("") {
+    constructor(uint256 betAmount, uint32 validators, bytes32 root, string memory URI) ERC1155("") {
         wager = betAmount;
         validatorCount = validators;
         state = root;
-        tokenURI = URI; 
+        tokenURI = URI;
     }
 
     /// @dev Only wallets set on offchain merkle tree can call this function to stops bets
-    function lockBets(bytes32[] calldata proof, uint index) external {
-        require(
-            verifyProof(state, proof, msg.sender, index),
-            "failed to verify proof"
-        );
+    function lockBets(bytes32[] calldata proof, uint256 index) external {
+        require(verifyProof(state, proof, msg.sender, index), "failed to verify proof");
         require(!votedToLock[msg.sender]);
         votedToLock[msg.sender] = true;
         locked += 1e18;
     }
 
     /// @dev Only wallets set on offchain merkle tree can call this function to end the game
-    function endGame(bytes32[] calldata proof, uint index) external {
+    function endGame(bytes32[] calldata proof, uint256 index) external {
         //at least half of the validators must have voted
         require((trueAttestation + falseAttestation) * 10 ** 18 >= (validatorCount * 10 ** 18) / 2);
-        //bets must have been locked first 
+        //bets must have been locked first
         require(locked >= (validatorCount * 10 ** 18) / 2);
-        require(
-            verifyProof(state, proof, msg.sender, index),
-            "failed to verify proof"
-        );
+        require(verifyProof(state, proof, msg.sender, index), "failed to verify proof");
         require(!votedToEndGame[msg.sender]);
         votedToEndGame[msg.sender] = true;
         gameOver += 1e18;
@@ -88,15 +82,8 @@ contract VoteEscrow is ERC1155 {
     }
 
     /// @dev Vote after bets lock
-    function voteOutcome(
-        bytes32[] calldata proof,
-        uint index,
-        bool decision
-    ) external {
-        require(
-            verifyProof(state, proof, msg.sender, index),
-            "failed to verify proof"
-        );
+    function voteOutcome(bytes32[] calldata proof, uint256 index, bool decision) external {
+        require(verifyProof(state, proof, msg.sender, index), "failed to verify proof");
         //bets must be locked
         require((locked >= (validatorCount * 10 ** 18) / 2), "bets not locked");
         //no double voting
@@ -110,30 +97,26 @@ contract VoteEscrow is ERC1155 {
     }
 
     function collectPayout() external {
-        require((gameOver >= (validatorCount * 10 ** 18) / 2) , "game not over");
+        require((gameOver >= (validatorCount * 10 ** 18) / 2), "game not over");
         require(!paid[msg.sender], "already paid");
         bool outcome = deliverOutcome();
         require(addyToVote[msg.sender] == outcome, "you voted wrong");
         require(voted[msg.sender], "you didn't vote");
         paid[msg.sender] = true;
-        uint payout = calculatePayout(outcome);
-        (bool sent, ) = (msg.sender).call{value: payout}("");
+        uint256 payout = calculatePayout(outcome);
+        (bool sent,) = (msg.sender).call{value: payout}("");
         require(sent, "Failed to send Ether");
     }
 
-    function calculatePayout(bool oc) internal returns (uint) {
+    function calculatePayout(bool oc) internal returns (uint256) {
         // condition is only true the first time it runs, so state is set only then, the rest simply returns prizeShareSize
         if (prizeShareSize == 0) {
             if (oc == true) {
                 //split by true vote
-                prizeShareSize =
-                    address(this).balance /
-                    countLove;
+                prizeShareSize = address(this).balance / countLove;
             } else {
                 //split by false vote
-                prizeShareSize =
-                    address(this).balance /
-                    countHate;
+                prizeShareSize = address(this).balance / countHate;
             }
         }
         return prizeShareSize;
@@ -147,15 +130,14 @@ contract VoteEscrow is ERC1155 {
         }
     }
 
-    function verifyProof(
-        bytes32 root,
-        bytes32[] memory proof,
-        address leaf,
-        uint index
-    ) public pure returns (bool) {
+    function verifyProof(bytes32 root, bytes32[] memory proof, address leaf, uint256 index)
+        public
+        pure
+        returns (bool)
+    {
         bytes32 hash = keccak256(abi.encodePacked(leaf));
 
-        for (uint i = 0; i < proof.length; i++) {
+        for (uint256 i = 0; i < proof.length; i++) {
             bytes32 proofElement = proof[i];
 
             if (index % 2 == 0) {
@@ -179,15 +161,7 @@ contract VoteEscrow is ERC1155 {
         return "PUSH";
     }
 
-    function uri(uint256 _tokenId)
-        public
-        view
-        override
-        returns (string memory)
-    {
-        return
-            string(
-                abi.encodePacked(tokenURI, Strings.toString(_tokenId))
-            );
+    function uri(uint256 _tokenId) public view override returns (string memory) {
+        return string(abi.encodePacked(tokenURI, Strings.toString(_tokenId)));
     }
 }
