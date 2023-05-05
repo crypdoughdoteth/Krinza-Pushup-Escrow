@@ -2,15 +2,15 @@ const { MerkleTree } = require('merkletreejs')
 const SHA256 = require('keccak256')
 
 
-const leaves = ['0x1804c8AB1F12E6bbf3894d4083f33e07309d1f38', '0xD0e61aaE436Be77460190a937c1e4b3452F27576', '0xCBD6832Ebc203e49E2B771897067fce3c58575ac'].map(v => SHA256(v))
+const leaves = ['0xe2b8651bF50913057fF47FC4f02A8e12146083B8', '0x940ACd9375b46EC2FA7C0E8aAd9D7241fb01e205', '0xCBD6832Ebc203e49E2B771897067fce3c58575ac'].map(v => SHA256(v))
 const tree = new MerkleTree(leaves, SHA256, {sort : false})
 const root = tree.getHexRoot()
 
-const leaf = SHA256('0x1804c8AB1F12E6bbf3894d4083f33e07309d1f38')
+const leaf = SHA256('0xe2b8651bF50913057fF47FC4f02A8e12146083B8')
 const proof = tree.getHexProof(leaf)
 console.log(tree.toString())
-console.log(tree.getHexRoot())
-console.log(proof)
+console.log("Root", tree.getHexRoot())
+console.log("Proof for [0]",proof)
 
 
 //Hardhat wallet
@@ -24,3 +24,5 @@ console.log(proof)
 //   '0x1353b521f4d4677111dc2223972696fb560c95f95ade5c12c1ebccb9c05e411e',
 //   '0xdd8bcb48f3721a782a5b92e5e52f3e272683acf506ae930613244355c4fd0048'
 // ]
+
+// Testing wallet
